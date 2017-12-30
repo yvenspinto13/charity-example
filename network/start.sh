@@ -21,6 +21,8 @@ export FABRIC_START_TIMEOUT=10
 sleep ${FABRIC_START_TIMEOUT}
 
 # Create the channel
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.charity.com/msp" peer0.org1.charity.com peer channel create -o orderer.charity.com:7050 -c charity_channel -f /etc/hyperledger/configtx/channel.tx
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.charity.com/msp" peer0.org1.charity.com peer channel create -o orderer.charity.com:7050 -c charitychannel -f /etc/hyperledger/configtx/channel.tx
 # Join peer0.org1.charity.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.charity.com/msp" peer0.org1.charity.com peer channel join -b charity_channel.block
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.charity.com/msp" peer0.org1.charity.com peer channel join -b charitychannel.block
+
+printf "Network started"

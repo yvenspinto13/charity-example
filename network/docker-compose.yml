@@ -98,15 +98,15 @@ services:
     networks:
       - basic
 
-  cli:
-    container_name: cli
+  charitycli:
+    container_name: charitycli
     image: hyperledger/fabric-tools
     tty: true
     environment:
       - GOPATH=/opt/gopath
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_ID=cli
+      - CORE_PEER_ID=charitycli
       - CORE_PEER_ADDRESS=peer0.org1.charity.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.charity.com/users/Admin@org1.charity.com/msp

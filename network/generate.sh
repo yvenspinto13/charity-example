@@ -6,7 +6,7 @@
 #
 export PATH=$GOPATH/src/github.com/hyperledger/fabric/build/bin:${PWD}/../bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
-CHANNEL_NAME=charity_channel
+CHANNEL_NAME=charitychannel
 
 # remove previous crypto material and config transactions
 rm -fr config/*
