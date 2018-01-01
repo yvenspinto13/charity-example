@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -51,6 +52,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.createDonation(APIstub, args)
 	} else if function == "queryAllDonations" {
 		return s.queryAllDonations(APIstub)
+	} else if function == "totalDonationAmount" {
+		return s.totalDonationAmount(APIstub)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -68,11 +71,11 @@ func (s *SmartContract) queryDonation(APIstub shim.ChaincodeStubInterface, args 
 
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 	donations := []Donation{
-		Donation{Donor: "Yvens Pinto", Amount: "10000", Date: "13/12/2017", Cause: "23ed Birthday"},
-		Donation{Donor: "Lerisa Gomes", Amount: "50000", Date: "04/11/2017", Cause: "1st Salary"},
-		Donation{Donor: "Vishal Robertson", Amount: "7777", Date: "24/08/2017", Cause: "Anniversary"},
+		Donation{Donor: "Yvens Pinto", Amount: "30000", Date: "13/12/2017", Cause: "23ed Birthday"},
+		Donation{Donor: "Lerisa Gomes", Amount: "20000", Date: "04/11/2017", Cause: "1st Salary"},
+		Donation{Donor: "Vishal Robertson", Amount: "10000", Date: "24/08/2017", Cause: "Anniversary"},
 		Donation{Donor: "Asif Muhamad", Amount: "60000", Date: "01/01/2017", Cause: "New Year"},
-		Donation{Donor: "Elon Musk", Amount: "33333", Date: "31/05/2017", Cause: "Company Bonus"},
+		Donation{Donor: "Elon Musk", Amount: "30000", Date: "31/05/2017", Cause: "Company Bonus"},
 	}
 
 	i := 0
@@ -137,59 +140,54 @@ func (s *SmartContract) queryAllDonations(APIstub shim.ChaincodeStubInterface) s
 		buffer.WriteString("}")
 		bArrayMemberAlreadyWritten = true
 	}
+	buffer.WriteString("]")	
+	fmt.Printf("- queryAllDonations:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
+}
+
+func (s *SmartContract) totalDonationAmount(APIstub shim.ChaincodeStubInterface) sc.Response {
+	var totalAmount int64 = 0
+	startKey := "DONATION0"
+	endKey := "DONATION999"
+	
+	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+
+	// buffer is a JSON array containing QueryResults
+	var buffer bytes.Buffer
+	buffer.WriteString("Total Donations: [")
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+	
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		stringRow := string(queryResponse.Value)
+		stringSlice1 := strings.Split(stringRow, ",")
+		stringSlice2 := strings.Split(stringSlice1[0], ":")
+		stringSlice3 := strings.Split(stringSlice2[1], "\"")
+		stringAmount := stringSlice3[1]
+
+		i64, err := strconv.ParseInt(stringAmount, 10, 64)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		totalAmount = totalAmount + i64
+
+	}
+	buffer.WriteString(strconv.FormatInt(totalAmount, 10))
 	buffer.WriteString("]")
 
 	fmt.Printf("- queryAllDonations:\n%s\n", buffer.String())
 
 	return shim.Success(buffer.Bytes())
 }
-
-// func (s *SmartContract) totalDonationAmount(APIstub shim.ChaincodeStubInterface) sc.Response {
-// 	totalAmount := 0
-// 	tempAmount := 0
-// 	startKey := "DONATION0"
-// 	endKey := "DONATION999"
-	
-// 	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-// 	defer resultsIterator.Close()
-
-// 	// buffer is a JSON array containing QueryResults
-// 	var buffer bytes.Buffer
-// 	buffer.WriteString("[")
-
-// 	bArrayMemberAlreadyWritten := false
-// 	for resultsIterator.HasNext() {
-// 		queryResponse, err := resultsIterator.Next()
-// 		if err != nil {
-// 			return shim.Error(err.Error())
-// 		}
-// 		// Add a comma before array members, suppress it for the first array member
-// 		if bArrayMemberAlreadyWritten == true {
-// 			buffer.WriteString(",")
-// 		}
-// 		buffer.WriteString("{\"Key\":")
-// 		buffer.WriteString("\"")
-// 		buffer.WriteString(queryResponse.Key)
-// 		buffer.WriteString("\"")
-
-// 		buffer.WriteString(", \"Record\":")
-// 		// Record is a JSON object, so we write as-is
-// 		buffer.WriteString(string(queryResponse.Value))
-// 		buffer.WriteString("}")
-// 		bArrayMemberAlreadyWritten = true
-// 		tempAmount, _ := strconv.ParseInt(queryResponse.Value.Amount, 10, 0)
-// 		totalAmount := totalAmount + tempAmount
-// 	}
-// 	buffer.WriteString("]")
-
-// 	fmt.Printf("Total Donations: "+totalAmount+"\n")
-// 	fmt.Printf("- queryAllDonations:\n%s\n", buffer.String())
-
-// 	return shim.Success(buffer.Bytes())
-// }
 
 
 // The main function is only relevant in unit test mode. Only included here for completeness.
