@@ -77,7 +77,6 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		Donation{Donor: "Asif Muhamad", Amount: "60000", Date: "01/01/2017", Cause: "New Year"},
 		Donation{Donor: "Elon Musk", Amount: "30000", Date: "31/05/2017", Cause: "Company Bonus"},
 	}
-
 	i := 0
 	for i < len(donations) {
 		fmt.Println("i is ", i)
@@ -86,7 +85,6 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		fmt.Println("Added", donations[i])
 		i = i + 1
 	}
-
 	return shim.Success(nil)
 }
 
@@ -188,7 +186,6 @@ func (s *SmartContract) totalDonationAmount(APIstub shim.ChaincodeStubInterface)
 
 	return shim.Success(buffer.Bytes())
 }
-
 
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
